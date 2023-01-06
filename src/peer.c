@@ -28,6 +28,26 @@ peer *succ = NULL;
  */
 int forward(peer *p, packet *pack) {
     /* TODO IMPLEMENT */
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        perror("socket");
+        return -1;
+    }
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(p->port);
+    addr.sin_addr.s_addr = inet_addr(p->addr);
+
+    if (connect(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        perror("connect");
+        return -1;
+    }
+    if(send(sockfd, pack, sizeof(packet), 0) < 0) {
+        perror("send");
+        return -1;
+    }
+    close(sockfd);
     
 
 }
@@ -88,14 +108,14 @@ int lookup_peer(uint16_t hash_id) {
     int target_node_id = hash_id % (*ht)->value_len;
 
     // Send a message to the target node asking for the value
-    int value = ht[target_node_id]->value;
+    int value = (int) ht[target_node_id]->value;
 
     if (value != 0) {
         // Return a success callback if the value was found
-        return "success";
+        return 1;
     } else {
         // Return a failure callback if the value was not found
-        return "failure";
+        return -1;
     }
 }
 /**
@@ -154,7 +174,7 @@ int answer_lookup(packet *p, peer *n) {
     /* TODO IMPLEMENT */
 
     // Send a message to the target node asking for the value
-    int value = ht[p->node_id]->value;
+    int value = (int) ht[p->node_id]->value;
 
     if (value != 0) {
         // Return a success callback if the value was found
