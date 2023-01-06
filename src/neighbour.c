@@ -121,6 +121,13 @@ uint32_t peer_get_ip(const peer *p) {
 
 int peer_is_responsible(uint16_t pred_id, uint16_t peer_id, uint16_t hash_id) {
     /* TODO IMPLEMENT */
+    if (pred_id == peer_id) {
+        return 1;
+    }
+    if (pred_id < peer_id) {
+        return (pred_id < hash_id && hash_id <= peer_id);
+    }
+    return (pred_id < hash_id || hash_id <= peer_id);
 }
 
 void peer_disconnect(peer *p) {

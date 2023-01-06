@@ -28,6 +28,7 @@ peer *succ = NULL;
  */
 int forward(peer *p, packet *pack) {
     /* TODO IMPLEMENT */
+    
 
 }
 
@@ -151,8 +152,18 @@ int handle_own_request(server *srv, client *c, packet *p) {
 
 int answer_lookup(packet *p, peer *n) {
     /* TODO IMPLEMENT */
-}
 
+    // Send a message to the target node asking for the value
+    int value = ht[p->node_id]->value;
+
+    if (value != 0) {
+        // Return a success callback if the value was found
+        return 1;
+    } else {
+        // Return a failure callback if the value was not found
+        return -1;
+    }
+}
 
 /**
  * @brief Handle a key request request from a client.
