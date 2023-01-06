@@ -3,58 +3,39 @@
 void htable_set(htable **ht, const unsigned char *key, size_t key_len,
                 const unsigned char *value, size_t value_len) {
     /* TODO IMPLEMENT */
-    int hash = hash_function(key, key_len);
-    htable *curr = ht[hash];
-    if (curr == NULL) {
-        curr = htable_new();
-        curr->key = key;
-        curr->key_len = key_len;
-        curr->value = value;
-        curr->value_len = value_len;
-    } else {
-        htable *prev = NULL;
-        while (curr != NULL) {
-            if (curr->key == key) {
-                curr->value = value;
-                curr->value_len = value_len;
-                return;
-            }
-            prev = curr;
-            curr = curr->next;
+        htable *s;
+        HASH_FIND(hh, *ht, key, key_len, s); //find the key
+        if (s == NULL) {
+            s = (htable *)malloc(sizeof(htable)); //if it doesn't exist, create it
+            s->key = (unsigned char *)malloc(key_len);
+            memcpy(s->key, key, key_len);
+            s->key_len = key_len;
+            HASH_ADD_KEYPTR(hh, *ht, s->key, s->key_len, s); //add it to the hash table
         }
-        prev->next = htable_new();
-        prev->next->key = key;
-        prev->next->key_len = key_len;
-        prev->next->value = value;
-        prev->next->value_len = value_len;
-    }
+        s->value = (unsigned char *)malloc(value_len); //set the value
+        memcpy(s->value, value, value_len);
+        s->value_len = value_len;
+
     
 }
 
 htable *htable_get(htable **ht, const unsigned char *key, size_t key_len) {
     /* TODO IMPLEMENT */
-int hash = hash_function(key, key_len);
-    htable *curr = ht[hash];
-    if (curr == NULL) {
-        return NULL;
-    } else {
-        while (curr != NULL) {
-            if (curr->key == key) {
-                return curr;
-            }
-            curr = curr->next;
-        }
-        return NULL;
-    }
+    htable *s;
+    HASH_FIND(hh, *ht, key, key_len, s);
+    return s;
 }
 
 int htable_delete(htable **ht, const unsigned char *key, size_t key_len) {
     /* TODO IMPLEMENT */
-    int hash = hash_function(key, key_len);
-    htable *curr = ht[hash];
-    htable *prev = NULL;
-    if (curr == NULL) {
+    htable *s;
+    HASH_FIND(hh, *ht, key, key_len, s);
+    if (s) {
+        HASH_DEL(*ht, s);
+        free(s->key);
+        free(s->value);
+        free(s);
         return 0;
-    } else {
-        while (curr != NULL)
+    }
+    return -1;
 }

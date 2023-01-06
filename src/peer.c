@@ -97,9 +97,6 @@ int lookup_peer(uint16_t hash_id) {
         return "failure";
     }
 }
-
-
-}
 /**
  * @brief Handle a client request.
  *
@@ -110,20 +107,12 @@ int lookup_peer(uint16_t hash_id) {
  */
 int handle_request(server *srv, client *c, packet *p) {
     /* TODO IMPLEMENT */
-
-    //1. Check if the packet is a control packet
-    if (p->flags & PKT_FLAG_CTRL) {
-        //1.1. If it is, handle it
-        handle_ctrl_packet(srv, c, p);
-    } else {
-        //1.2. If it is not, check if the packet is for us
-        if (p->hash_id == self->hash_id) {
-            //1.2.1. If it is, handle it
-            handle_own_request(srv, c, p);
-        } else {
-            //1.2.2. If it is not, forward it
-            proxy_request(srv, c->sock, p, succ);
-        }
+    if (p->flags & PKT_FLAG_SET) {
+        htable_set(&ht, p->key, p->key_len, p->value, p->value_len);
+    } else if (p->flags & PKT_FLAG_GET) {
+        htable_get(&ht, p->key, p->key_len);
+    } else if (p->flags & PKT_FLAG_DEL) {
+        htable_delete(&ht, p->key, p->key_len);
     }
     return CB_REMOVE_CLIENT;
 }
@@ -162,8 +151,8 @@ int handle_own_request(server *srv, client *c, packet *p) {
 
 int answer_lookup(packet *p, peer *n) {
     /* TODO IMPLEMENT */
-    return CB_REMOVE_CLIENT;
 }
+
 
 /**
  * @brief Handle a key request request from a client.
